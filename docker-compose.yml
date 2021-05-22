@@ -1,0 +1,32 @@
+version: '3'
+services:
+  presto:
+    hostname: presto
+    image: 'starburstdata/presto:345-e.11'
+    container_name: presto
+    ports:
+      - '8080:8080'
+    volumes:
+      - './presto/presto-cli-0.253-executable.jar:/usr/bin/presto'
+      - './presto/minio.properties:/usr/lib/presto/etc/catalog/minio.properties'
+  hadoop:
+    hostname: hadoop-master
+    image: 'prestodb/hive3.1-hive:latest'
+    container_name: hadoop-master
+    environment:
+      AWS_ACCESS_KEY_ID: minio
+      AWS_SECRET_ACCESS_KEY: minio123
+    volumes:
+      - './hadoop/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml'
+  mc-job:
+    image: 'minio/mc:latest'
+    environment:
+      MC_HOST_presto: "http://minio:minio123@192.168.3.5:9000/"
+    volumes:
+      - './minio/data:/minio'
+    entrypoint: |
+      /bin/bash -c "
+      /usr/bin/mc mb --quiet presto/customer-data-text;
+      /usr/bin/mc mb --quiet presto/customer-data-orc;
+      /usr/bin/mc mirror minio/customer-data-text presto/customer-data-text;
+      "
