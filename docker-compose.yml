@@ -2,7 +2,7 @@ version: '3'
 services:
   presto:
     hostname: presto
-    image: 'starburstdata/presto:345-e.11'
+    image: 'starburstdata/presto:350-e.7'
     container_name: presto
     ports:
       - '8080:8080'
@@ -21,7 +21,7 @@ services:
   mc-job:
     image: 'minio/mc:latest'
     environment:
-      MC_HOST_presto: "http://minio:minio123@192.168.3.5:9000/"
+      MC_HOST_presto: "https://minio:minio123@play.min.io"
     volumes:
       - './minio/data:/minio'
     entrypoint: |

@@ -82,7 +82,7 @@
         <name>hadoop.proxyuser.hive.hosts</name>
         <value>*</value>
     </property>
-  
+
     <property>
         <name>hadoop.proxyuser.hive.groups</name>
         <value>*</value>
@@ -102,12 +102,12 @@
     <!-- Minio properties -->
     <property>
         <name>fs.s3a.connection.ssl.enabled</name>
-        <value>false</value>
+        <value>true</value>
     </property>
 
     <property>
         <name>fs.s3a.endpoint</name>
-        <value>http://192.168.3.5:9000</value>
+        <value>https://play.min.io</value>
     </property>
 
     <property>
