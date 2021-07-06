@@ -11,7 +11,7 @@ services:
       - './presto/minio.properties:/usr/lib/presto/etc/catalog/minio.properties'
   hadoop:
     hostname: hadoop-master
-    image: 'prestodb/hive3.1-hive:latest'
+    image: 'prestodb/hive3.1-hive:5'
     container_name: hadoop-master
     environment:
       AWS_ACCESS_KEY_ID: minio
