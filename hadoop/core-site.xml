@@ -102,22 +102,22 @@
     <!-- Minio properties -->
     <property>
         <name>fs.s3a.connection.ssl.enabled</name>
-        <value>true</value>
+        <value>false</value>
     </property>
 
     <property>
         <name>fs.s3a.endpoint</name>
-        <value>https://play.min.io</value>
+        <value>http://172.19.0.2:9000</value>
     </property>
 
     <property>
         <name>fs.s3a.access.key</name>
-        <value>minio</value>
+        <value>minioadmin</value>
     </property>
 
     <property>
         <name>fs.s3a.secret.key</name>
-        <value>minio123</value>
+        <value>minioadmin</value>
     </property>
 
     <property>

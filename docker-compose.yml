@@ -1,32 +1,52 @@
-version: '3'
+version: '1'
 services:
+  minio:
+    hostname: minio-server
+    image: 'minio/minio:latest'
+    container_name: minio-server
+    command: server --console-address ":9001" /minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+    volumes:
+      - '~/minio/data:/minio'
+  hadoop:
+    hostname: hadoop-master
+    image: 'prestodb/hive3.1-hive:10'
+    container_name: hadoop-master
+    environment:
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+    volumes:
+      - './hadoop/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml'
+    depends_on:
+      - minio
   presto:
     hostname: presto
-    image: 'starburstdata/presto:350-e.7'
+    image: 'ahanaio/prestodb-sandbox:0.280'
     container_name: presto
     ports:
       - '8080:8080'
     volumes:
-      - './presto/presto-cli-0.253-executable.jar:/usr/bin/presto'
-      - './presto/minio.properties:/usr/lib/presto/etc/catalog/minio.properties'
-  hadoop:
-    hostname: hadoop-master
-    image: 'prestodb/hive3.1-hive:5'
-    container_name: hadoop-master
-    environment:
-      AWS_ACCESS_KEY_ID: minio
-      AWS_SECRET_ACCESS_KEY: minio123
-    volumes:
-      - './hadoop/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml'
+      - './presto/minio.properties:/opt/presto-server/etc/catalog/minio.properties'
+    depends_on:
+      - minio
+      - hadoop
   mc-job:
     image: 'minio/mc:latest'
     environment:
-      MC_HOST_presto: "https://minio:minio123@play.min.io"
+      MC_HOST_presto: "http://minioadmin:minioadmin@172.19.0.2:9000"
     volumes:
       - './minio/data:/minio'
+    depends_on:
+      - minio
+      - hadoop
     entrypoint: |
       /bin/bash -c "
-      /usr/bin/mc mb --quiet presto/customer-data-text;
-      /usr/bin/mc mb --quiet presto/customer-data-orc;
+      /usr/bin/mc mb presto/customer-data-text;
+      /usr/bin/mc mb presto/customer-data-orc;
       /usr/bin/mc mirror minio/customer-data-text presto/customer-data-text;
       "
