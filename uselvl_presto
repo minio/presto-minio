@@ -1,0 +1,59 @@
+#!/bin/sh
+
+set -e
+
+SCRIPT_DIR=`dirname -- "$( readlink -f -- "$0"; )";`
+
+# Check if PRESTO_TOP env var is set.
+# The env var must point to the repro
+# directory "presto"
+# e.g. $HOME/presto if the "presto" repo 
+# was cloned into the home directory.
+if [ -z ${PRESTO_TOP} ]; then
+    echo "Set PRESTO_TOP environment variable."
+    exit 1
+fi
+
+if [ -z ${PRESTO_HOME} ]; then
+    echo "Set PRESTO_HOME environment variable. Where should presto go?"
+    exit 1
+fi
+
+# Setup base dir if it does not exist
+if [ ! -d ${PRESTO_HOME} ]; then
+    mkdir -p ${PRESTO_HOME}/data
+fi
+
+# Link in the directories built.
+# Some directories are created such as the etc if
+# it does not exist.
+
+if [ ! -d ${PRESTO_HOME}/etc/catalog ]; then
+    mkdir -p ${PRESTO_HOME}/etc
+fi
+
+cp -rf ${SCRIPT_DIR}/presto/etc/* ${PRESTO_HOME}/etc
+# Replace the container hadoop-master with locahost access to the exposed port
+echo "Setting up configuration..."
+sed -e 's/hadoop-master/127.0.0.1/' ${PRESTO_HOME}/etc/catalog/minio.properties | tee ${PRESTO_HOME}/etc/catalog/minio.properties
+echo ""
+
+# Cleanup of the copy and links except for the configuration in etc.
+rm -rf ${PRESTO_HOME}/bin
+rm -rf ${PRESTO_HOME}/lib
+rm -rf ${PRESTO_HOME}/plugin
+rm -rf ${PRESTO_HOME}/NOTICE
+rm -rf ${PRESTO_HOME}/README.txt
+
+# Copy in bin dir (needed because the launcher will look at the config based on its actual location).
+# Copy in the presto-cli to communicate with the presto server.
+# Link in lib and other files.
+cp -r ${PRESTO_TOP}/presto-server/target/presto-server-*-SNAPSHOT/presto-server-*-SNAPSHOT/bin ${PRESTO_HOME}/bin
+cp -r ${PRESTO_TOP}/presto-cli/target/presto-cli-*-SNAPSHOT-executable.jar ${PRESTO_HOME}/bin/presto-cli
+ln -s ${PRESTO_TOP}/presto-server/target/presto-server-*-SNAPSHOT/presto-server-*-SNAPSHOT/lib ${PRESTO_HOME}/lib
+ln -s ${PRESTO_TOP}/presto-server/target/presto-server-*-SNAPSHOT/presto-server-*-SNAPSHOT/plugin ${PRESTO_HOME}/plugin
+ln -s ${PRESTO_TOP}/presto-server/target/presto-server-*-SNAPSHOT/presto-server-*-SNAPSHOT/NOTICE ${PRESTO_HOME}/NOTICE
+ln -s ${PRESTO_TOP}/presto-server/target/presto-server-*-SNAPSHOT/presto-server-*-SNAPSHOT/README.txt ${PRESTO_HOME}/README.txt
+
+
+echo "uselvl_presto complete in ${PRESTO_HOME}"

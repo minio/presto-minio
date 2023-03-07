@@ -22,6 +22,8 @@ services:
       AWS_SECRET_ACCESS_KEY: minioadmin
     volumes:
       - './hadoop/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml'
+    ports:
+    - '9083:9083'
     depends_on:
       - minio
   presto:
@@ -31,7 +33,7 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - './presto/minio.properties:/opt/presto-server/etc/catalog/minio.properties'
+      - './presto/catalog/minio.properties:/opt/presto-server/etc/catalog/minio.properties'
     depends_on:
       - minio
       - hadoop
