@@ -33,7 +33,7 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - './presto/catalog/minio.properties:/opt/presto-server/etc/catalog/minio.properties'
+      - './presto/etc/catalog/minio.properties:/opt/presto-server/etc/catalog/minio.properties'
     depends_on:
       - minio
       - hadoop
@@ -52,3 +52,10 @@ services:
       /usr/bin/mc mb presto/customer-data-orc;
       /usr/bin/mc mirror minio/customer-data-text presto/customer-data-text;
       "
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet:  172.19.0.1/16
